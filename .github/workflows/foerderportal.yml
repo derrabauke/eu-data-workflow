@@ -19,3 +19,4 @@ jobs:
         with:
           http_url: https://foerderportal.bund.de/foekat/jsp/SucheAction.do?actionMode=print&presentationType=csv
           downloaded_filename: foerderportal.csv
+          axios_config: foerderportal_config.json

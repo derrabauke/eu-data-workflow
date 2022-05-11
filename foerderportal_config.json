@@ -1,0 +1,8 @@
+{
+    "withCredentials": true,
+    "headers": {
+        "X-XSRF-TOKEN": "45B21DF9151378EF2A2CBB007FEC1970"
+    },
+    "xsrfCookieName": "JSESSIONID",
+    "xsrfHeaderName": "X-XSRF-TOKEN"
+}
