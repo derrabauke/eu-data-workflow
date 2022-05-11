@@ -17,6 +17,7 @@ jobs:
       - name: Fetch data
         uses: githubocto/flat@v3
         with:
-          http_url: https://foerderportal.bund.de/foekat/jsp/SucheAction.do?actionMode=print&presentationType=csv
-          downloaded_filename: foerderportal.csv
+          # http_url: https://foerderportal.bund.de/foekat/jsp/SucheAction.do?actionMode=print&presentationType=csv
+          http_url: https://cordis.europa.eu/data/cordis-h2020projects-csv.zip
+          downloaded_filename: foerderportal.zip
           axios_config: foerderportal_config.json
