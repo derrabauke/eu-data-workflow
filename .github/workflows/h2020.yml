@@ -15,7 +15,13 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
       - name: Fetch data
-        uses: githubocto/flat@v3
+        run: |
+          curl -o h2020_projects.zip https://cordis.europa.eu/data/cordis-h2020projects-csv.zip
+          unzip h2020_projects.zip
+          tail -500 cordis-h2020projects.csv > h2020_projects_newest_500.csv
+      - uses: GuillaumeFalourd/git-commit-push@v1.3
         with:
-          http_url: https://cordis.europa.eu/data/cordis-h2020projects-csv.zip
-          downloaded_filename: h2020.zip
+          email: ${{ github.actor }}@users.noreply.github.com
+          name: ${{ github.actor }}
+          commit_message: update h2020_projects.csv
+          files: h2020_projects_newest_500.csv
