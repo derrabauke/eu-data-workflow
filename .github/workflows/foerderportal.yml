@@ -15,10 +15,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
       - name: Fetch data
+        env:
+          SESSIONID: ${{ secrets.SESSION_ID }}
         run: |
-          curl -s --cookie-jar cookies.txt -o dump.txt https://foerderportal.bund.de/foekat/jsp/SucheAction.do?actionMode=searchreset
-          cat cookies.txt
-          curl --cookie cookies.txt -o foerderportal.csv https://foerderportal.bund.de/foekat/jsp/SucheAction.do?actionMode=print&presentationType=csv
+          curl --cookie JSESSIONID=$SESSIONID -o foerderportal.csv https://foerderportal.bund.de/foekat/jsp/SucheAction.do\?actionMode\=print\&presentationType\=csv
+          head -n 5 foerderportal.csv
       - uses: GuillaumeFalourd/git-commit-push@v1.3
         with:
           email: ${{ github.actor }}@users.noreply.github.com
