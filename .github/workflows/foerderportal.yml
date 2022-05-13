@@ -19,10 +19,10 @@ jobs:
           SESSIONID: ${{ secrets.SESSION_ID }}
         run: |
           curl --cookie JSESSIONID=$SESSIONID -o foerderportal.csv https://foerderportal.bund.de/foekat/jsp/SucheAction.do\?actionMode\=print\&presentationType\=csv
-          head -n 5 foerderportal.csv
+          tail -100 foerderportal.csv > foerderportal_newest_100.csv
       - uses: GuillaumeFalourd/git-commit-push@v1.3
         with:
           email: ${{ github.actor }}@users.noreply.github.com
           name: ${{ github.actor }}
           commit_message: update foerderportal.csv
-          files: foerderportal.csv
+          files: foerderportal_newest_100.csv
