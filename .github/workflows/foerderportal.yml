@@ -16,7 +16,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Fetch data
         run: |
-          curl -s --cookie-jar cookies.txt https://foerderportal.bund.de/foekat/jsp/SucheAction.do?actionMode=searchreset >/dev/null 2>&1
+          curl -s --cookie-jar cookies.txt -o dump.txt https://foerderportal.bund.de/foekat/jsp/SucheAction.do?actionMode=searchreset
+          cat cookies.txt
           curl --cookie cookies.txt -o foerderportal.csv https://foerderportal.bund.de/foekat/jsp/SucheAction.do?actionMode=print&presentationType=csv
       - uses: GuillaumeFalourd/git-commit-push@v1.3
         with:
