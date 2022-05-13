@@ -15,9 +15,12 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
       - name: Fetch data
-        uses: githubocto/flat@v3
+        run: |
+          curl -s --cookie-jar cookies.txt https://foerderportal.bund.de/foekat/jsp/SucheAction.do?actionMode=searchreset >/dev/null 2>&1
+          curl --cookie cookies.txt -o foerderportal.csv https://foerderportal.bund.de/foekat/jsp/SucheAction.do?actionMode=print&presentationType=csv
+      - uses: GuillaumeFalourd/git-commit-push@v1.3
         with:
-          # http_url: https://foerderportal.bund.de/foekat/jsp/SucheAction.do?actionMode=print&presentationType=csv
-          http_url: https://cordis.europa.eu/data/cordis-h2020projects-csv.zip
-          downloaded_filename: foerderportal.zip
-          axios_config: foerderportal_config.json
+          email: ${{ github.actor }}@users.noreply.github.com
+          name: ${{ github.actor }}
+          commit_message: update foerderportal.csv
+          files: foerderportal.csv
