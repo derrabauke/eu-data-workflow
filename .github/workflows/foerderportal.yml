@@ -19,10 +19,12 @@ jobs:
           SESSIONID: ${{ secrets.SESSION_ID }}
         run: |
           curl --cookie JSESSIONID=$SESSIONID -o foerderportal.csv https://foerderportal.bund.de/foekat/jsp/SucheAction.do\?actionMode\=print\&presentationType\=csv
-          tail -100 foerderportal.csv > foerderportal_newest_100.csv
-      - uses: GuillaumeFalourd/git-commit-push@v1.3
-        with:
-          email: ${{ github.actor }}@users.noreply.github.com
-          name: ${{ github.actor }}
-          commit_message: update foerderportal.csv
-          files: foerderportal_newest_100.csv
+          tail -100 foerderportal.csv > foerderportal_newest_100.csv  
+      - name: Commit and push if it changed
+        run: |-
+          git config user.name "Automated"
+          git config user.email "actions@users.noreply.github.com"
+          git add foerderportal_newest_100.csv
+          timestamp=$(date -u)
+          git commit -m "Latest foederportal data: ${timestamp}" || exit 0
+          git push
