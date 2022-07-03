@@ -48,9 +48,9 @@ jobs:
         run: |-
           CSVFILE=h2020_projects_out_date_formatted.csv
           LATEST=${CSVFILE:0:-4}_latest.csv
-          LASTRUN=$(date -I -d "- 1 week")
-          CONTENTUPDATE=$(csvcut -n -d "," $CSVFILE | awk '$2 ~ /(contentUpdateDate)/ {print($1)}' | sed -e 's/\://')
-          awk '$(CUD+1)>LR' FS="," CUD="$CONTENTUPDATE" LR="$LASTRUN" $CSVFILE > $LATEST
-          cat $LATEST | csvlook | less -S
+          LASTRUN=$(date -I -d "- 1 years")
+          CONTENTUPDATE=$(csvcut -n -d "|" $CSVFILE | awk '$2 ~ /(contentUpdateDate)/ {print($1)}' | sed -e 's/\://')
+          awk '$CUD>LR' FS="|" CUD="$CONTENTUPDATE" LR="$LASTRUN" $CSVFILE > $LATEST
+          cat $LATEST | csvlook -d "|" | less -S
       # - name: Load
           # - upload to neo4j aura db

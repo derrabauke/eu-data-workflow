@@ -11,8 +11,7 @@ if len(sys.argv) < 2 :
   raise("Missing file path.")
 
 def customParser(date):
-  res = pd.to_datetime(date, infer_datetime_format=True, dayfirst=True)
-  return res
+  return pd.to_datetime(date, infer_datetime_format=True, dayfirst=True)
 
 
 with open(sys.argv[1], "r", newline="") as f, open(os.path.splitext(sys.argv[1])[0] + "_date_formatted.csv", "w", newline="") as out:
@@ -21,4 +20,4 @@ with open(sys.argv[1], "r", newline="") as f, open(os.path.splitext(sys.argv[1])
   # parse dates in given columns
   csv = pd.read_csv(f, quotechar='"', parse_dates=columns, date_parser=customParser)
   # write output
-  csv.to_csv(out, quotechar="'", index=False)
+  csv.to_csv(out, sep="|", quotechar='"', quoting=0, index=False)
