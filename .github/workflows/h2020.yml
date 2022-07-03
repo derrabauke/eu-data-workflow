@@ -17,20 +17,22 @@ jobs:
           pip install pandas csvkit
       - name: Check out repository
         uses: actions/checkout@v2
-      - name: Extract
-        run: |-
-          curl -o h2020_data.zip https://cordis.europa.eu/data/cordis-h2020projects-csv.zip
-          unzip h2020_data.zip
-          mv csv/project.csv h2020_projects.csv
-          mv csv/organization.csv h2020_organizations.csv
+      # - name: Extract
+      #   run: |-
+      #     curl -o h2020_data.zip https://cordis.europa.eu/data/cordis-h2020projects-csv.zip
+      #     unzip h2020_data.zip
+      #     mv csv/project.csv h2020_projects.csv
+      #     mv csv/organization.csv h2020_organizations.csv
       - name: Transform - Format Date
         # - clean bad formatted lines with csvclean, this produces {filename}_out.csv and {filename}_err.csv
         # - find column headings containing "Date"
         # - format dates in those columns
         run: |-
           csvclean -d ";" h2020_projects.csv
-          COLS=$(csvcut -n -d ";" h2020_projects.csv | awk '$2 ~ /(Date)/ {print($1-1)}' | sed -e 's/\://')
-          ./format-date.py "h2020_projects.csv" $COLS
+          CSVFILE=h2020_projects_out.csv
+          COLS=$(csvcut -n $CSVFILE | awk '$2 ~ /(Date)/ {print($1-1)}' | sed -e 's/\://')
+          echo $COLS
+          ./format-date.py $CSVFILE $COLS
       - name: Commit and push if something has changed
         run: |-
           git config user.name "Automated"
