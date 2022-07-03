@@ -12,19 +12,44 @@ jobs:
   scheduled:
     runs-on: ubuntu-latest
     steps:
+      - name: Install deps
+        run: |-
+          pip install pandas csvkit
       - name: Check out repository
         uses: actions/checkout@v2
-      - name: Fetch data
+      - name: Extract
         run: |-
           curl -o h2020_data.zip https://cordis.europa.eu/data/cordis-h2020projects-csv.zip
           unzip h2020_data.zip
           mv csv/project.csv h2020_projects.csv
           mv csv/organization.csv h2020_organizations.csv
-      - name: Commit and push if it changed
+      - name: Transform - Format Date
+        # - clean bad formatted lines with csvclean, this produces {filename}_out.csv and {filename}_err.csv
+        # - find column headings containing "Date"
+        # - format dates in those columns
+        run: |-
+          csvclean -d ";" h2020_projects.csv
+          COLS=$(csvcut -n -d ";" h2020_projects.csv | awk '$2 ~ /(Date)/ {print($1-1)}' | sed -e 's/\://')
+          ./format-date.py "h2020_projects.csv" $COLS
+      - name: Commit and push if something has changed
         run: |-
           git config user.name "Automated"
           git config user.email "actions@users.noreply.github.com"
-          git add h2020_organizations.csv h2020_projects.csv
+          git add h2020_organizations.csv h2020_projects.csv h2020_projects_out_date_formatted.csv
           timestamp=$(date -u)
           git commit -m "data(h2020): ${timestamp}" || exit 0
           git push
+      - name: Transform - Slice new entries
+          # - therefore slice csv to contain only lately updated records
+          # - last run is assumed one weeks ago
+          # - contentUpdateDate is the column we want to compare
+          # - add 1 to specified column since first argument to awk will be the whole row followed by each column
+        run: |-
+          CSVFILE=h2020_projects_out_date_formatted.csv
+          LATEST=${CSVFILE:0:-4}_latest.csv
+          LASTRUN=$(date -I -d "- 1 week")
+          CONTENTUPDATE=$(csvcut -n -d "," $CSVFILE | awk '$2 ~ /(contentUpdateDate)/ {print($1)}' | sed -e 's/\://')
+          awk '$(CUD+1)>LR' FS="," CUD="$CONTENTUPDATE" LR="$LASTRUN" $CSVFILE > $LATEST
+          cat $LATEST
+      # - name: Load
+          # - upload to neo4j aura db
