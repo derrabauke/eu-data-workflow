@@ -41,10 +41,10 @@ jobs:
           git commit -m "data(h2020): ${timestamp}" || exit 0
           git push
       - name: Transform - Slice new entries
-          # - therefore slice csv to contain only lately updated records
-          # - last run is assumed one weeks ago
-          # - contentUpdateDate is the column we want to compare
-          # - add 1 to specified column since first argument to awk will be the whole row followed by each column
+        # - therefore slice csv to contain only lately updated records
+        # - last run is assumed one weeks ago
+        # - contentUpdateDate is the column we want to compare
+        # - add 1 to specified column since first argument to awk will be the whole row followed by each column
         run: |-
           CSVFILE=h2020_projects_out_date_formatted.csv
           LATEST=${CSVFILE:0:-4}_latest.csv
@@ -52,5 +52,11 @@ jobs:
           CONTENTUPDATE=$(csvcut -n -d "|" $CSVFILE | awk '$2 ~ /(contentUpdateDate)/ {print($1)}' | sed -e 's/\://')
           awk '$CUD>LR' FS="|" CUD="$CONTENTUPDATE" LR="$LASTRUN" $CSVFILE > $LATEST
           cat $LATEST | csvlook -d "|" | less -S
-      # - name: Load
-          # - upload to neo4j aura db
+      - name: Load
+        # - upload to neo4j aura db
+        uses: cbastn/cypher-shell-docker@v1
+        with:
+          address: ${{ secrets.NEO4J_URI }}
+          username: ${{ secrets.NEO4J_USER }}
+          password: ${{ secrets.NEO4J_PASSWORD }}
+          file: ".github/workflows/h2020_import.cypher"
