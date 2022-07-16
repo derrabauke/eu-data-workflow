@@ -28,31 +28,27 @@ jobs:
         # - find column headings containing "Date"
         # - format dates in those columns
         run: |-
-          csvclean -d ";" h2020_projects.csv
-          CSVOUT=h2020_projects_out.csv
-          DATE_COLS=$(csvcut -n $CSVOUT | awk '$2 ~ /(Date)/ {print($1-1)}' | sed -z 's/\n/,/g;s/,$/\n/' )
-          QUOTE_COLS=$(csvcut -n $CSVOUT | awk '$2 ~ /(title)|(objective)/ {print($1-1)}' | sed -z 's/\n/,/g;s/,$/\n/' )
-          ./format-date.py $CSVOUT $DATE_COLS $QUOTE_COLS
-      - name: Commit and push if something has changed
-        run: |-
-          git config user.name "Automated"
-          git config user.email "actions@users.noreply.github.com"
-          git add h2020_organizations.csv h2020_projects.csv h2020_projects_out_date_formatted.csv
-          timestamp=$(date -u)
-          git commit -m "data(h2020): ${timestamp}" || exit 0
-          git push
+          ./h2020_convert_data.sh
       - name: Transform - Slice new entries
-        # - therefore slice csv to contain only lately updated records
-        # - last run is assumed one weeks ago
-        # - contentUpdateDate is the column we want to compare
-        # - add 1 to specified column since first argument to awk will be the whole row followed by each column
+         # - therefore slice csv to contain only lately updated records
+         # - last run is assumed one weeks ago
+         # - contentUpdateDate is the column we want to compare
+         # - add 1 to specified column since first argument to awk will be the whole row followed by each column
         run: |-
           CSVFILE=h2020_projects_out_date_formatted.csv
           LATEST=${CSVFILE:0:-4}_latest.csv
           LASTRUN=$(date -I -d "- 1 years")
-          CONTENTUPDATE=$(csvcut -n -d "|" $CSVFILE | awk '$2 ~ /(contentUpdateDate)/ {print($1)}' | sed -e 's/\://')
-          awk '$CUD>LR' FS="|" CUD="$CONTENTUPDATE" LR="$LASTRUN" $CSVFILE > $LATEST
-          cat $LATEST | csvlook -d "|" | less -S
+          CONTENTUPDATE=$(csvcut -n -d "," $CSVFILE | awk '$2 ~ /(contentUpdateDate)/ {print($1)}' | sed -e 's/\://')
+          awk '$CUD>LR' FS="," CUD="$CONTENTUPDATE" LR="$LASTRUN" $CSVFILE > $LATEST
+          cat $LATEST | csvlook -d "," | less -S
+      - name: Commit and push if something has changed
+        run: |-
+          git config user.name "Automated"
+          git config user.email "actions@users.noreply.github.com"
+          git add h2020_organizations.csv h2020_projects.csv h2020_projects_out_date_formatted_latest.csv
+          timestamp=$(date -u)
+          git commit -m "data(h2020): ${timestamp}" || exit 0
+          git push
       - name: Load
         # - upload to neo4j aura db
         uses: cbastn/cypher-shell-docker@v1
@@ -60,4 +56,4 @@ jobs:
           address: ${{ secrets.NEO4J_URI }}
           username: ${{ secrets.NEO4J_USER }}
           password: ${{ secrets.NEO4J_PASSWORD }}
-          file: ".github/workflows/h2020_import.cypher"
+          file: "h2020_import.cypher"
