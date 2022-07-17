@@ -17,12 +17,15 @@ jobs:
           pip install pandas csvkit
       - name: Check out repository
         uses: actions/checkout@v2
-      # - name: Extract
-      #   run: |-
-      #     curl -o h2020_data.zip https://cordis.europa.eu/data/cordis-h2020projects-csv.zip
-      #     unzip h2020_data.zip
-      #     mv csv/project.csv h2020_projects.csv
-      #     mv csv/organization.csv h2020_organizations.csv
+      - name: Extract
+        run: |-
+          curl -o h2020_data.zip https://cordis.europa.eu/data/cordis-h2020projects-csv.zip
+          unzip h2020_data.zip
+          mv csv/project.csv h2020_projects.csv
+          mv csv/organization.csv h2020_organizations.csv
+          mv csv/topics.csv h2020_topics.csv
+          mv csv/legalBasis.csv h2020_legalBasis.csv
+          mv csv/euroSciVoc.csv h2020_euroSciVoc.csv
       - name: Transform - Format Date
         # - clean bad formatted lines with csvclean, this produces {filename}_out.csv and {filename}_err.csv
         # - find column headings containing "Date"
@@ -35,7 +38,7 @@ jobs:
          # - contentUpdateDate is the column we want to compare
          # - add 1 to specified column since first argument to awk will be the whole row followed by each column
         run: |-
-          CSVFILE=h2020_projects_out_date_formatted.csv
+          CSVFILE=h2020_projects_out_formatted.csv
           LATEST=${CSVFILE:0:-4}_latest.csv
           LASTRUN=$(date -I -d "- 1 years")
           CONTENTUPDATE=$(csvcut -n -d "," $CSVFILE | awk '$2 ~ /(contentUpdateDate)/ {print($1)}' | sed -e 's/\://')
@@ -45,7 +48,7 @@ jobs:
         run: |-
           git config user.name "Automated"
           git config user.email "actions@users.noreply.github.com"
-          git add h2020_organizations.csv h2020_projects.csv h2020_projects_out_date_formatted_latest.csv
+          git add h2020_organizations_out_formatted.csv h2020_projects_out_formatted.csv h2020_projects_out_formatted_latest.csv
           timestamp=$(date -u)
           git commit -m "data(h2020): ${timestamp}" || exit 0
           git push
