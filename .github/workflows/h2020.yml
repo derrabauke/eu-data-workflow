@@ -6,7 +6,7 @@ on:
       - .github/workflows/h2020.yml
   workflow_dispatch: #empty for now
   schedule:
-    - cron: '30 5 * * 1,3'
+    - cron: '30 5 * * 1'
 
 jobs:
   scheduled:
@@ -15,6 +15,7 @@ jobs:
       - name: Install deps
         run: |-
           pip install pandas csvkit
+          sudo apt install gawk
       - name: Check out repository
         uses: actions/checkout@v2
       - name: Extract
@@ -32,23 +33,35 @@ jobs:
         # - format dates in those columns
         run: |-
           ./h2020_convert_data.sh
-      - name: Transform - Slice new entries
+      - name: Transform - projects - slice new entries
          # - therefore slice csv to contain only lately updated records
-         # - last run is assumed one weeks ago
+         # - last run is assumed one week ago
          # - contentUpdateDate is the column we want to compare
-         # - add 1 to specified column since first argument to awk will be the whole row followed by each column
         run: |-
           CSVFILE=h2020_projects_out_formatted.csv
           LATEST=${CSVFILE:0:-4}_latest.csv
-          LASTRUN=$(date -I -d "- 1 years")
-          CONTENTUPDATE=$(csvcut -n -d "," $CSVFILE | awk '$2 ~ /(contentUpdateDate)/ {print($1)}' | sed -e 's/\://')
-          awk '$CUD>LR' FS="," CUD="$CONTENTUPDATE" LR="$LASTRUN" $CSVFILE > $LATEST
-          cat $LATEST | csvlook -d "," | less -S
+          LASTRUN=$(date -I -d "- 3 months")
+          CONTENTUPDATE=$(csvcut -n -d "," $CSVFILE | awk '$2 ~ /(contentUpdateDate)/ {print($1)}' | sed -e 's/\://' | awk '{print $0+1}')
+           gawk -F ',' -v CUD="$CONTENTUPDATE" -v LR="$LASTRUN" -f h2020_latest_filter.awk $CSVFILE > $LATEST
+          echo "The the count of rows that are not matching the expected column order:"
+          wc -l error_rows.txt
+      - name: Transform - organizations - slice new entries
+         # - therefore slice csv to contain only lately updated records
+         # - last run is assumed one week ago
+         # - contentUpdateDate is the column we want to compare
+        run: |-
+          CSVFILE=h2020_organizations_out_formatted.csv
+          LATEST=${CSVFILE:0:-4}_latest.csv
+          LASTRUN=$(date -I -d "- 3 months")
+          CONTENTUPDATE=$(csvcut -n -d "," $CSVFILE | awk '$2 ~ /(contentUpdateDate)/ {print($1)}' | sed -e 's/\://' | awk '{print $0+1}')
+          gawk -F ',' -v CUD="$CONTENTUPDATE" -v LR="$LASTRUN" -f h2020_latest_filter.awk $CSVFILE > $LATEST
+          echo "The count of rows that are not matching the expected column order:"
+          wc -l error_rows.txt
       - name: Commit and push if something has changed
         run: |-
           git config user.name "Automated"
           git config user.email "actions@users.noreply.github.com"
-          git add h2020_organizations_out_formatted.csv h2020_projects_out_formatted.csv h2020_projects_out_formatted_latest.csv
+          git add h2020_projects_out_formatted.csv h2020_projects_out_formatted_latest.csv h2020_organizations_out_formatted.csv h2020_projects_out_formatted_latest.csv h2020_euroSciVoc_out.csv h2020_legalBasis_out.csv h2020_topics_out.csv
           timestamp=$(date -u)
           git commit -m "data(h2020): ${timestamp}" || exit 0
           git push
