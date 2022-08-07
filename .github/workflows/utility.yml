@@ -1,0 +1,23 @@
+name: H2020 CORDIS data import
+
+on:
+  push:
+    paths:
+      - .github/workflows/h2020.yml
+  workflow_dispatch: #empty for now
+  schedule:
+    - cron: '* */71 * * *'
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Prevent_Idle
+        uses: cbastn/cypher-shell-docker@v1
+        with:
+          address: ${{ secrets.NEO4J_URI }}
+          username: ${{ secrets.NEO4J_USER }}
+          password: ${{ secrets.NEO4J_PASSWORD }}
+          file: "aura_util.cypher"
