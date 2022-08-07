@@ -1,9 +1,10 @@
-name: H2020 CORDIS data import
+name: Aura DB Util Job
 
 on:
   push:
     paths:
-      - .github/workflows/h2020.yml
+      - .github/workflows/utility.yml
+      - aura_util.cypher
   workflow_dispatch: #empty for now
   schedule:
     - cron: '* */71 * * *'

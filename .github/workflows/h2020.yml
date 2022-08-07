@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - .github/workflows/h2020.yml
+      - h2020_import.cypher
   workflow_dispatch: #empty for now
   schedule:
     - cron: '30 5 * * 1'
