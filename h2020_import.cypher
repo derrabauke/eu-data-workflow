@@ -22,6 +22,11 @@ WITH row WHERE row.id IS NOT NULL
 MATCH (p:EuProject {id: row.id})
 MATCH (o:Organization {projectID: row.id}) 
 MERGE (o)-[r:PARTICIPATING]->(p)
+RETURN count(r)
+
+LOAD CSV WITH HEADERS FROM 'https://github.com/derrabauke/eu-data-workflow/raw/main/h2020_projects_out_formatted_latest.csv' AS row
+WITH row WHERE row.id IS NOT NULL
+MATCH (p:EuProject {id: row.id})
 WITH p WHERE p.masterCall IS NOT NULL
 MERGE (mc:MasterCall {title: p.masterCall}) 
 MERGE (p)-[:CALLED_BY]->(mc)
