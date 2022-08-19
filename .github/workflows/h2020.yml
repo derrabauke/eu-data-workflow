@@ -66,11 +66,19 @@ jobs:
           timestamp=$(date -u)
           git commit -m "data(h2020): ${timestamp}" || exit 0
           git push
-      - name: Load
+      - name: Load Entities
         # - upload to neo4j aura db
         uses: cbastn/cypher-shell-docker@v1
         with:
           address: ${{ secrets.NEO4J_URI }}
           username: ${{ secrets.NEO4J_USER }}
           password: ${{ secrets.NEO4J_PASSWORD }}
-          file: "h2020_import.cypher"
+          file: "h2020_import_entities.cypher"
+      - name: Load Relationships
+        # - upload to neo4j aura db
+        uses: cbastn/cypher-shell-docker@v1
+        with:
+          address: ${{ secrets.NEO4J_URI }}
+          username: ${{ secrets.NEO4J_USER }}
+          password: ${{ secrets.NEO4J_PASSWORD }}
+          file: "h2020_import_relationships.cypher"
