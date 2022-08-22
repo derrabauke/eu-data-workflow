@@ -4,6 +4,10 @@ Here you witness my data analysis project which consists of this repo, which scr
 
 First of all this follows the great idea of [Simon Willison](https://github.com/simonw), who published [a great blog entry](https://simonwillison.net/2020/Oct/9/git-scraping/) about his experience of utilizing GitHub Actions as a scraping pipeline.
 
+The data of the CORIDS database (named "H2020" in this repo) underlies the copyright of the © [European Union 2022](https://cordis.europa.eu/about/legal/en#copyright).
+
+The data of the BMBF underlies copyright of © [Bundesministerium für Bildung und Forschung](https://www.bmbf.de/bmbf/de/services/datenschutz/datenschutz_node.html).
+
 ## Approach
 
 This repository does the following:
