@@ -4,14 +4,17 @@ WITH row WHERE row.projectID IS NOT NULL
 MATCH (p:EuProject {id: row.projectID})
 MATCH (o:Organization {organisationID: row.organisationID})
 MERGE (o)-[r:PARTICIPATE]->(p)
-	ON CREATE CALL {
-		WITH o,p
-		OPTIONAL MATCH (o2)-[:PARTICIPATE]->(p)
-		WHERE o2.organisationID IS NOT o.organisationID
-		MERGE (o)-[c:COOPERATE]-(o2)
-		WITH CASE c.weight WHEN null THEN 1 ELSE c.weight+1 END AS cw
-		SET c += { weight: cw}
-	}
+ON CREATE CALL {
+	WITH o,p
+	OPTIONAL MATCH (o2)-[:PARTICIPATE]->(p)
+	WHERE o2.organisationID IS NOT o.organisationID
+	MERGE (o)-[c:COOPERATE]-(o2)
+	WITH p,CASE c.weight 
+        WHEN null THEN 1
+        WHEN p.id IN c.projects THEN c.weight 
+        ELSE c.weight+1
+    END AS cw	SET c += { weight: cw}
+}
 SET r += {active: row.active, activityType: row.activityType, contactForm: row.contactForm, contentUpdateDate: row.contentUpdateDate, endOfParticipation: row.endOfParticipation, ecContribution: row.ecContribution, netEcContribution: row.netEcContribution, order: row.order, role: row.role, totalCost: row.totalCost }
 RETURN count(r)
 
