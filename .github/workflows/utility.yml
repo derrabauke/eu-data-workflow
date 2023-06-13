@@ -6,8 +6,6 @@ on:
       - .github/workflows/utility.yml
       - aura_util.cypher
   workflow_dispatch: #empty for now
-  schedule:
-    - cron: '* */71 * * *'
 
 jobs:
   scheduled:
